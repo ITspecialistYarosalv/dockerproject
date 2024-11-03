@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0  # Use the official MySQL image
+    container_name: mysql_container
+    environment:
+      MYSQL_DATABASE: my_database
+      MYSQL_USER: yaroslav
+      MYSQL_PASSWORD: passYaroslav
+      MYSQL_ROOT_PASSWORD: root_DB
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+  python_app:
+    build: .
+    container_name: python_app_container
+    environment:
+      MYSQL_DATABASE: my_database
+      MYSQL_USER: yaroslav
+      MYSQL_PASSWORD: passYaroslav
+      MYSQL_HOST: mysql  # Name of the MySQL service for Python to connect
+    depends_on:
+      - mysql
+    volumes:
+      - .:/app
+    command: ["python3", "/app/db_create.py"]
+
+  adminer:
+    image: adminer
+    container_name: adminer_container
+    ports:
+      - "8080:8080"  # Expose Adminer on port 8080
+    depends_on:
+      - mysql  # Ensure MySQL is up before starting Adminer
+
+volumes:
+  db_data:
